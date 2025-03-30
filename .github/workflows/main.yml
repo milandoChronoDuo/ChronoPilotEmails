@@ -2,7 +2,7 @@ name: Supabase PDF Workflow
 
 on:
   schedule:
-    - cron: '0 18 * * *' # Täglich um 02:00 UTC (anpassen falls nötig)
+    - cron: '0 4 * * *' # Täglich um 02:00 UTC (anpassen falls nötig)
   workflow_dispatch:
 
 jobs:
