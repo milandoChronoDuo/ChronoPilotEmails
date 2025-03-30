@@ -1,0 +1,8 @@
+# Node Modules
+node_modules/
+
+# Umgebungsvariablen (nicht im Repository speichern)
+.env
+
+# Generierte PDFs
+*.pdf
