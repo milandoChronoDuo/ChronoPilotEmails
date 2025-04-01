@@ -76,6 +76,8 @@ function drawFooter(doc, currentPage) {
      });
 }
 
+let currentPage = 1;
+
 // Berechnet die optimalen Spaltenbreiten anhand von Header- und Inhaltsbreiten
 function computeColumnWidths(doc, columns, data, tableWidth) {
   const padding = 20; // links+rechts
@@ -164,12 +166,10 @@ function drawTable(doc, tableName, data) {
   const columns = Object.keys(data[0]);
   const columnWidths = computeColumnWidths(doc, columns, data, tableWidth);
   
-  // Headerzeile der Tabelle (Spaltenkopf) – wird gleich zu Beginn gezeichnet
+  // Zeichne Tabellenkopfzeile
   doc.font('Helvetica-Bold').fontSize(12);
   const headerHeights = columns.map((col, i) => doc.heightOfString(col, { width: columnWidths[i] - 10 }));
   const headerHeight = Math.max(...headerHeights) + 20;
-  
-  // Zeichne die Tabellenkopfzeile
   drawTableHeader(doc, margin, tableWidth, headerHeight, columns, columnWidths);
   
   const footerSpace = 50; // Platz für Footer
@@ -178,21 +178,19 @@ function drawTable(doc, tableName, data) {
   // Datenzeilen
   data.forEach((row, rowIndex) => {
     const { rowHeight, cellHeights } = calculateRowMetrics(doc, columns, row);
-    // Prüfe, ob noch genügend Platz für die Zeile inkl. Footer vorhanden ist.
+    // Prüfe, ob noch genügend Platz für diese Zeile inkl. Footer vorhanden ist.
     if (y + rowHeight > doc.page.height - doc.page.margins.bottom - footerSpace) {
-      // Vor dem Seitenumbruch Footer zeichnen
       drawFooter(doc, currentPage);
       doc.addPage({ margin: 50, size: 'A4' });
       currentPage++;
-      // Auf neuer Seite Header (Report-Header) und Tabellenkopf zeichnen
+      // Auf neuer Seite: Header (Report-Header) und Tabellenkopf
       addHeader(doc, tableName);
       drawTableHeader(doc, margin, tableWidth, headerHeight, columns, columnWidths);
       y = doc.y;
     }
     
-    // Hintergrund der Zeile (abwechselnd)
-    doc.rect(margin, y, tableWidth, rowHeight)
-       .fill(rowIndex % 2 === 0 ? '#ecf0f1' : '#ffffff');
+    // Hintergrund der Datenzeile (abwechselnd)
+    doc.rect(margin, y, tableWidth, rowHeight).fill(rowIndex % 2 === 0 ? '#ecf0f1' : '#ffffff');
     
     // Zelleninhalt zeichnen, Datum formatieren
     let cumX = margin;
@@ -210,7 +208,7 @@ function drawTable(doc, tableName, data) {
       cumX += columnWidths[i];
     });
     
-    // Rahmen um die Zeile
+    // Rahmen um die Datenzeile
     doc.strokeColor('#bdc3c7').lineWidth(1);
     doc.rect(margin, y, tableWidth, rowHeight).stroke();
     cumX = margin;
@@ -227,6 +225,16 @@ function drawTable(doc, tableName, data) {
   
   // Auf der letzten Seite Footer zeichnen
   drawFooter(doc, currentPage);
+}
+
+// Ruft die Supabase RPC-Funktion "update_monthly_freizeitkonto" auf
+async function updateMonthlyFreizeitkonto() {
+  const { data, error } = await supabase.rpc('update_monthly_freizeitkonto');
+  if (error) {
+    console.error('Fehler beim Aufruf von update_monthly_freizeitkonto:', error);
+  } else {
+    console.log('Ergebnis von update_monthly_freizeitkonto:', data);
+  }
 }
 
 // PDF-Generierung für eine Tabelle
@@ -343,6 +351,9 @@ async function runWorkflow() {
       fs.unlinkSync(filePath);
       console.log(`Temporäre Datei gelöscht: ${filePath}`);
     }
+    
+    // Zum Schluss erst die Übertragung der Minusstunden (update_monthly_freizeitkonto) aufrufen
+    await updateMonthlyFreizeitkonto();
     
     console.log('Workflow erfolgreich abgeschlossen!');
   } catch (error) {
