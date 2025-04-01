@@ -1,0 +1,28 @@
+name: Data Rollover Workflow
+
+on:
+  schedule:
+    - cron: '15 23 31 12 *'
+  workflow_dispatch:
+
+jobs:
+  rollover:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Node.js Setup
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Data Rollover ausführen
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node src/rollover.js
