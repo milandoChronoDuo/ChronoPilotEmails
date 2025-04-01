@@ -339,8 +339,8 @@ async function runWorkflow() {
     // E-Mail senden (alle PDFs als Anhänge)
     if (pdfPaths.length > 0) {
       await sendEmailWithAttachments(
-        'Monatliche Berichte',
-        'Anbei finden Sie die automatisch generierten Berichte.',
+        'ChronoPilot - Monatliche Berichte',
+        'Guten Tag Herr Sunay,\n\nanbei finden Sie die von uns verarbeiteten Berichte Ihrer Mitarbeiter.\nfalls es Unstimmigkeiten gibt melden sie bitte bei uns.\n\nMit freundlichen Grüßen,\nMilando Sunay von ChronoDuo',
         pdfPaths
       );
     }
