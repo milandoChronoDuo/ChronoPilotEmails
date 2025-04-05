@@ -307,7 +307,7 @@ async function runWorkflow() {
     const pdfPaths = [];
     
     // Statische Tabellen
-    const staticTables = ['raw_data', 'gesamtzeiten', 'urlaubsantraege', 'daily_summary'];
+    const staticTables = ['raw_data', 'gesamtzeiten', 'urlaubsantraege', 'daily_summary', 'baustellenzeit'];
     for (const table of staticTables) {
       console.log(`Verarbeite ${table}...`);
       const { data, error } = await supabase.from(table).select('*');
